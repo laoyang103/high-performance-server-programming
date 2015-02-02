@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
+#include <libgen.h>
 #include <sys/signal.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, handle_term);
 
     if (argc < 3) {
-        printf("usage: %s ip_address port backlog\n", argv[0]);
+        printf("usage: %s ip_address port backlog\n", basename(argv[0]));
         return 1;
     }
 
