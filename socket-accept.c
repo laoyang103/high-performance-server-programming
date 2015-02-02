@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
+#include <libgen.h>
 #include <sys/signal.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, handle_term);
 
     if (argc < 3) {
-        printf("usage: %s ip_address port\n", argv[0]);
+        printf("usage: %s ip_address port\n", basename(argv[0]));
         return 1;
     }
 
@@ -47,12 +48,21 @@ int main(int argc, char *argv[])
     socklen_t client_socklen = sizeof (client);
     int confd = accept(sock, (struct sockaddr *)&client, &client_socklen);
 
+    struct sockaddr_in local;
+    struct sockaddr_in remote;
+    char remote_str[INET_ADDRSTRLEN];
+    getsockname(confd, (struct sockaddr *)&local, &client_socklen);
+    getpeername(confd, (struct sockaddr *)&remote, &client_socklen);
+    printf("local is ip: %s port: %d\n", inet_ntop(AF_INET, &local.sin_addr, 
+                remote_str, INET_ADDRSTRLEN), ntohs(local.sin_port));
+    printf("remote is ip: %s port: %d\n", inet_ntop(AF_INET, &remote.sin_addr, 
+                remote_str, INET_ADDRSTRLEN), ntohs(remote.sin_port));
+
     if (confd < 0) {
         printf("errno is: %d\n", errno);
     } else {
-        char remote[INET_ADDRSTRLEN];
         printf("connected with ip: %s port: %d\n", inet_ntop(AF_INET, &client.sin_addr, 
-                    remote, INET_ADDRSTRLEN), ntohs(client.sin_port));
+                    remote_str, INET_ADDRSTRLEN), ntohs(client.sin_port));
         close(confd);
     }
 
