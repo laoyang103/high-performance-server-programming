@@ -39,7 +39,6 @@ int main(int argc, char *argv[])
     int reuse = 1;
     int loc_sock = socket(PF_INET, SOCK_STREAM, 0);
     assert(loc_sock >= 0);
-    setsockopt(loc_sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof (reuse));
 
     struct sockaddr_in loc_addr;
     bzero(&loc_addr, sizeof (loc_addr));
@@ -47,6 +46,8 @@ int main(int argc, char *argv[])
     loc_addr.sin_addr.s_addr = htons(INADDR_ANY);
     loc_addr.sin_port = htons(loc_port);
 
+    /* It will failed when loc_addr is TIME_WAIT, unless set SO_REUSEADDR opt. */
+    setsockopt(loc_sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof (reuse));
     if (-1 == bind(loc_sock, (struct sockaddr *)&loc_addr, sizeof (loc_addr))) {
         perror("bind address failed");
         exit(1);
